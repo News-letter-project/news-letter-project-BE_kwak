@@ -1,0 +1,29 @@
+# Docker compose 파일 버전(3.8 이상 )
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: news_letter_db
+    restart: always # 컨테이너가 종료되어도 항상 재시작
+    # 컨테이너 안에서 PostgreSQL은 5432 포트로 동작함
+    # localhost 5433으로 접속하면 컨테이너 내부의 5432로 포스트그리 연결
+    # .env에 POSTGRES_PORT 포트 번호가 없으면 기본적으로 5433포트로 외부에서 접속된다.
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    volumes:
+      # 데이터 로컬에 영구 보존(컨테이너 삭제해도 데이터 유지)
+      # 나의 프로젝트 폴더에 있는 pgdata 폴더에 데이터가 저장된다.
+      # pgdata 폴더는 자동으로 생성된다.
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # 컨테이너 DB가 정상적으로 접속 가능한 상태인지 검사
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
