@@ -1,4 +1,4 @@
-package com.example.news.news_letter_back.domain;
+package com.example.news.news_letter_back.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
