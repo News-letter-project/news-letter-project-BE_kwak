@@ -2,13 +2,13 @@ package com.example.news.news_letter_back.controller;
 
 import com.example.news.news_letter_back.dto.SubscriberDto;
 import com.example.news.news_letter_back.dto.SubscriberPageResponse;
+import com.example.news.news_letter_back.dto.SubscriberRequest;
 import com.example.news.news_letter_back.repository.SubscriberRepository;
 import com.example.news.news_letter_back.service.SubscriberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,11 +36,11 @@ public class SubscriberController {
 
     @PostMapping("/subscribe")
     public ResponseEntity<?> subscribe(@RequestBody SubscriberRequest request) {
-        return subscriberService.subscribe(request.getEmail());
+        return service.subscribe(request.getEmail());
     }
 
     @GetMapping("/unsubscribe")
     public ResponseEntity<?> unsubscribe(@RequestParam("token") String token) {
-        return subscriberService.unsubscribe(token);
+        return service.unsubscribe(token);
     }
 }
