@@ -3,6 +3,7 @@ package com.example.news.news_letter_back.service;
 import com.example.news.news_letter_back.dto.SubscriberDto;
 import com.example.news.news_letter_back.dto.SubscriberPageResponse;
 import com.example.news.news_letter_back.entity.Subscriber;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ public interface SubscriberService {
     // 구독자 통계 + 구독자 리스트
     public SubscriberPageResponse getSubscriber(String email, String status_bcode);
 
+    public ResponseEntity<?> subscribe(String email);
 
-
+    public ResponseEntity<?> unsubscribe(String token);
 }

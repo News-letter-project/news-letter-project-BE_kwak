@@ -4,6 +4,8 @@ import com.example.news.news_letter_back.entity.Subscriber;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.Query;
 
 public interface SubscriberRepository extends JpaRepository<Subscriber,Long> {
@@ -21,6 +23,8 @@ public interface SubscriberRepository extends JpaRepository<Subscriber,Long> {
     public List<Subscriber> findByEmailContaining(String email);
     public List<Subscriber> findByStatusBcode(String statusBcode);
 
+    public Optional<Subscriber> findByEmail(String email);
 
+    public Optional<Subscriber> findByUnsubscribeToken(String unsubscribeToken);
 
 }
