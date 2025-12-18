@@ -1,9 +1,11 @@
 package com.example.news.news_letter_back.config;
 
+import com.example.news.news_letter_back.entity.AdminUser;
 import com.example.news.news_letter_back.entity.TbAcode;
 import com.example.news.news_letter_back.entity.TbBcode;
 import com.example.news.news_letter_back.entity.TbBcodeId;
 import com.example.news.news_letter_back.repository.AcodeRepository;
+import com.example.news.news_letter_back.repository.AdminUserRepository;
 import com.example.news.news_letter_back.repository.BcodeRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Profile;
@@ -17,10 +19,12 @@ public class CodeInitializer {
 
     private final AcodeRepository acodeRepository;
     private final BcodeRepository bCodeRepository;
+    private final AdminUserRepository adminUserRepository;
 
-    public CodeInitializer(AcodeRepository acodeRepository, BcodeRepository bCodeRepository) {
+    public CodeInitializer(AcodeRepository acodeRepository, BcodeRepository bCodeRepository, AdminUserRepository adminUserRepository) {
         this.acodeRepository = acodeRepository;
         this.bCodeRepository = bCodeRepository;
+        this.adminUserRepository = adminUserRepository;
     }
 
     @PostConstruct
@@ -64,6 +68,18 @@ public class CodeInitializer {
                             .build());
                 });
             }
+        }
+
+        // 관리자 테이블이 비어있으면 자동 생성
+        if (adminUserRepository.count() == 0) {
+            AdminUser admin = AdminUser.builder()
+                    .email("admin@example.com")
+                    // TODO: 변경 필요
+                    .passwordHash("1234")
+                    .isActive(true)
+                    .build();
+
+            adminUserRepository.save(admin);
         }
     }
 

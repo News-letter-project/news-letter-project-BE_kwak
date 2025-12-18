@@ -1,0 +1,10 @@
+package com.example.news.news_letter_back.repository;
+
+import com.example.news.news_letter_back.entity.Newsletter;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface NewsletterRepository extends JpaRepository<Newsletter, Long> {
+    boolean findByTemplateId(String templateId);
+
+    boolean existsByTemplateId(String templateId);
+}
