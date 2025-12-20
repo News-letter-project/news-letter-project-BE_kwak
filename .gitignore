@@ -3,6 +3,7 @@ HELP.md
 *.pem
 portfolio-key.*
 portfolio-key
+
 pgdata/
 application.yml
 .env

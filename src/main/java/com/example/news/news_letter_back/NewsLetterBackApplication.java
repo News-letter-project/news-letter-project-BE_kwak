@@ -8,6 +8,8 @@ public class NewsLetterBackApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(NewsLetterBackApplication.class, args);
+
+        // CI/CD 테스트입니다2
     }
 
 }

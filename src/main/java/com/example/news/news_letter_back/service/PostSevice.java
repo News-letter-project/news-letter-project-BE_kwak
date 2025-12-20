@@ -1,0 +1,140 @@
+package com.example.news.news_letter_back.service;
+
+import com.example.news.news_letter_back.dto.post.PostListInfoDto;
+import com.example.news.news_letter_back.dto.post.PostRequestDto;
+import com.example.news.news_letter_back.dto.post.PostResponseDto;
+import com.example.news.news_letter_back.entity.AdminUser;
+import com.example.news.news_letter_back.entity.Post;
+import com.example.news.news_letter_back.repository.AdminUserRepository;
+import com.example.news.news_letter_back.repository.PostRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties.Admin;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+
+@Service
+public class PostSevice {
+
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
+    AdminUserRepository adminUserRepository;
+
+    // 새 글 발행하기
+    public String publishNew(PostRequestDto postRequestDto) {
+        AdminUser adminUser = adminUserRepository.findById(postRequestDto.getAdminId())
+            .orElseThrow(() -> new IllegalArgumentException());
+
+        Post post = Post.builder()
+            .adminUser(adminUser)
+            .title(postRequestDto.getTitle())
+            .contentHtml(postRequestDto.getContentHtml())
+            .statusBcode(postRequestDto.getStatusBcode())
+            .build();
+
+        post.istitle();
+        post.publish();
+        postRepository.save(post);
+        return "글을 발행했습니다.";
+    }
+
+    //새 글 임시저장
+    public String draft(PostRequestDto postRequestDto) {
+        AdminUser adminUser = adminUserRepository.findById(postRequestDto.getAdminId())
+            .orElseThrow(() -> new IllegalArgumentException());
+
+        Post post = Post.builder()
+            .adminUser(adminUser)
+            .title(postRequestDto.getTitle())
+            .contentHtml(postRequestDto.getContentHtml())
+            .statusBcode(postRequestDto.getStatusBcode())
+            .build();
+
+        post.istitle();
+        postRepository.save(post);
+        return "글을 임시저장 했습니다.";
+    }
+
+
+    // 글 삭제하기
+    public String delete(Long postId) {
+        postRepository.deleteById(postId);
+        return "글을 삭제했습니다.";
+    }
+
+    // 글 수정하기 + 임시저장
+    public String updateRedraft(PostRequestDto postRequestDto) {
+        Post post = postRepository.findById(postRequestDto.getPostId())
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글"));
+        post.istitle();
+        post.update(postRequestDto.getTitle(), postRequestDto.getContentHtml(),
+            postRequestDto.getStatusBcode());
+        postRepository.save(post);
+        return "수정한 글을 임시저장 했습니다.";
+    }
+
+    // 글 수정 + 발행하기
+    public String updatePublish(PostRequestDto postRequestDto) {
+        Post post = postRepository.findById(postRequestDto.getPostId())
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글"));
+        post.istitle();
+        post.update(postRequestDto.getTitle(), postRequestDto.getContentHtml(),
+            postRequestDto.getStatusBcode());
+        post.publish();
+        postRepository.save(post);
+
+        return "수정한 글을 발행 했습니다.";
+    }
+
+    // 글 목록 가져오기 + 페이징 처리
+    public Page<PostListInfoDto> getPost(PostRequestDto postRequestDto) {
+
+        // 검색조건 가져오기
+        String title = postRequestDto.getTitle();
+        String status_bcode = postRequestDto.getStatusBcode();
+
+        // 페이징정보(페이지 차례, 행의 개수)
+        int page = postRequestDto.getPage();
+        int size = postRequestDto.getSize();
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Post> entitiesPage;
+
+        // 검색조건에 따라서 글 가지고 오기
+        if (title != null && !title.isBlank() && status_bcode != null && !status_bcode.equals(
+            "ALL")) {
+            entitiesPage = postRepository.findByTitleContainingAndStatusBcode(title, status_bcode,
+                pageable);
+        } else if (title != null && !title.isBlank()) {
+            entitiesPage = postRepository.findByTitleContaining(title, pageable);
+        } else if (status_bcode != null && !status_bcode.equals("ALL")) {
+            entitiesPage = postRepository.findByStatusBcode(status_bcode, pageable);
+        } else {
+            entitiesPage = postRepository.findAll(pageable);
+        }
+
+        return entitiesPage.map(PostListInfoDto::fromEntity);
+    }
+
+    // 글 상세보기
+    public PostResponseDto getPostDetail(Long postId) {
+        // 글id로 원하는 글 데이터 찾기
+        Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new IllegalArgumentException());
+        // 작성자 id로 작성자 데이터 찾기
+        AdminUser adminuser = adminUserRepository.findById(postId)
+            .orElseThrow();
+
+        return PostResponseDto.fromEntity(post, adminuser);
+
+    }
+
+
+}
